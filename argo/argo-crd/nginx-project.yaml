@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: nginx
+  namespace: argo-cd
+spec:
+  destinations:
+    - namespace: 'default'
+      server: 'https://kubernetes.default.svc'
+  sourceNamespaces:
+    - default
+  sourceRepos:
+    - '*'

@@ -1,0 +1,241 @@
+crds:
+  install: true
+  keep: true
+
+global:
+  revisionHistoryLimit: 20
+  
+  # Default logging options used by all components
+  logging:
+    # -- Set the global logging format. Either: `text` or `json`
+    format: text
+    # -- Set the global logging level. One of: `debug`, `info`, `warn` or `error`
+    level: info
+  addPrometheusAnnotations: true
+  securityContext:
+    runAsUser: 999
+    runAsGroup: 999
+    fsGroup: 999
+
+  # priorityClassName: "service-application-tier"
+
+  networkPolicy:
+    create: false
+
+controller:
+  replicas: 1
+  extraArgs:
+    - --application-namespaces="argo-cd"
+  pdb:
+    enabled: true
+    minAvailable: "50%"
+    maxUnavailable: "25%"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+  
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 1m
+      memory: 64Mi
+
+repoServer:
+  autoscaling:
+    enabled: true
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 70
+    minReplicas: 1
+    maxReplicas: 3
+    behavior:
+      scaleDown:
+       stabilizationWindowSeconds: 300
+       policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 180
+      
+      scaleUp:
+        stabilizationWindowSeconds: 300
+        policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+  pdb:
+    enabled: true
+    minAvailable: "50%"
+    maxUnavailable: "25%"
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+  volumes:
+  - name: argocd-plugins
+    emptyDir: {}
+  - name: shell-binary
+    emptyDir: {}
+
+  volumeMounts:
+  - name: argocd-plugins
+    mountPath: "/home/argocd/.local/share/kustomize/plugins/"
+  - name: shell-binary
+    mountPath: "/home/argocd/.local/share/bin"
+
+  env:
+    - name: "KUSTOMIZE_PLUGIN_HOME"
+      value: "/home/argocd/.local/share/kustomize/plugins/"
+
+server:
+  replicas: 1
+  extraArgs:
+    - --application-namespaces="argo-cd"
+  
+  autoscaling:
+    enabled: true
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 70
+    minReplicas: 1
+    maxReplicas: 3
+    behavior:
+      scaleDown:
+       stabilizationWindowSeconds: 300
+       policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 180
+      
+      scaleUp:
+        stabilizationWindowSeconds: 300
+        policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+
+  pdb:
+    enabled: true
+    minAvailable: "50%"
+    maxUnavailable: "25%"
+  
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+
+configs:
+  params:
+    server.disable.auth: false
+    server.insecure: true
+    server.enable.gzip: true
+    server.x.frame.options: sameorigin
+
+  rbac:
+    create: true
+
+  secret:
+    createSecret: true
+    # -- Shared secret for authenticating GitHub webhook events
+    githubSecret: ""
+    # -- Shared secret for authenticating GitLab webhook events
+    gitlabSecret: ""
+
+
+    # -- Bcrypt hashed admin password
+    ## Argo expects the password in the secret to be bcrypt hashed. You can create this hash with
+    ## `htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'`
+    argocdServerAdminPassword: ""
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 32Mi
+  
+  containerPorts:
+    metrics: 8082
+
+  containerSecurityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+    capabilities:
+      drop:
+      - ALL
+
+redis:
+  exporter:
+    resources:
+      limits:
+        cpu: 200m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
+
+    readinessProbe:
+      enabled: true
+    livenessProbe:
+      enabled: true
+
+applicationSet:
+  replicas: 1
+  
+  metrics:
+    enabled: true
+  
+  serviceMonitor:
+    enabled: true
+  
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+  
+  pdb:
+    enabled: true
+    minAvailable: "50%"
+    maxUnavailable: "25%"
+
+
+notification:
+  enabled: true
+
+  metrics:
+    enabled: true
+
+  serviceMonitor:
+    enabled: true
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 10Mi
