@@ -1,5 +1,3 @@
 **/charts/**
 .DS_Store
 **/*secrets.yaml
-README.md
-app-example.json
