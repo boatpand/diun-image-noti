@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: diun
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: diun
+  template:
+    metadata:
+      labels:
+        app: diun
+    spec:
+      serviceAccountName: diun
+      containers:
+        - name: diun
+          image: crazymax/diun:latest
+          imagePullPolicy: Always
+          args: ["serve"]
+          env:
+            - name: TZ
+              value: "Asia/Bangkok"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: LOG_JSON
+              value: "false"
+            - name: DIUN_WATCH_WORKERS
+              value: "20"
+            - name: DIUN_WATCH_SCHEDULE
+              value: "0 */6 * * *"
+            - name: DIUN_WATCH_JITTER
+              value: "30s"
+            - name: DIUN_PROVIDERS_KUBERNETES
+              value: "true"
+            - name: DIUN_DEFAULTS_SORTTAGS
+              value: "semver"
+            - name: DIUN_DEFAULTS_MAXTAGS
+              value: "1"
+            - name: DIUN_DEFAULTS_NOTIFYON
+              value: "new"
+            # dockerhub cred
+            - name: DIUN_REGOPTS_HUB_NAME
+              value: "docker.io/boatpand"
+            - name: DIUN_REGOPTS_HUB_SELECTOR
+              value: "image"
+            - name: DIUN_REGOPTS_HUB_USERNAME
+              valueFrom: 
+                secretKeyRef:
+                  name: diun-secret
+                  key: username
+            - name: DIUN_REGOPTS_HUB_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: diun-secret
+                  key: password
+            # do container registry cred
+            - name: DIUN_REGOPTS_DO_NAME
+              value: "registry.digitalocean.com/mynginx"
+            - name: DIUN_REGOPTS_DO_SELECTOR
+              value: "image"
+            - name: DIUN_REGOPTS_DO_USERNAME
+              valueFrom: 
+                secretKeyRef:
+                  name: diun-secret
+                  key: do-username
+            - name: DIUN_REGOPTS_DO_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: diun-secret
+                  key: do-password
+            # set to false when run at prod
+            - name: DIUN_WATCH_FIRSTCHECKNOTIF
+              value: "true"
+            - name: DIUN_NOTIF_TEAMS_WEBHOOKURL
+              valueFrom: 
+                secretKeyRef:
+                  name: diun-secret
+                  key: teamsWebhookUrl
+            - name: DIUN_NOTIF_TEAMS_TEMPLATEBODY
+              valueFrom: 
+                secretKeyRef:
+                  name: diun-secret
+                  key: teamsTemplateBody
+          volumeMounts:
+            - mountPath: "/data"
+              name: "data"
+      restartPolicy: Always
+      volumes:
+        - name: "data"
+          persistentVolumeClaim:
+            claimName: diun-data
+

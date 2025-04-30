@@ -1,3 +1,5 @@
+namespace: do
+
 resources:
   - deployment.yaml
   - service.yaml

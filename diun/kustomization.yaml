@@ -1,0 +1,6 @@
+namespace: diun 
+resources:
+  - sa.yaml
+  - pvc.yaml
+  - deployment.yaml
+  - secrets.yaml

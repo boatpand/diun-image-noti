@@ -13,16 +13,16 @@ spec:
         app: nginx
       annotations:
         diun.enable: "true"
-        diun.regopt: "docker.io/boatpand"
+        diun.regopt: "registry.digitalocean.com/mynginx"
         diun.watch_repo: "true"
         diun.include_tags: '^v1\.0+\.\d+$'
-        diun.metadata.image_name: "docker.io/boatpand/mynginx:latest"
+        diun.metadata.image_name: "registry.digitalocean.com/mynginx/mynginx:latest"
         diun.metadata.deployment_name: "ngixn-deployment"
-        diun.metadata.namespace: "default"
+        diun.metadata.namespace: "do"
     spec:
       containers:
       - name: nginx
-        image: docker.io/boatpand/mynginx:v1.0.0
+        image: registry.digitalocean.com/mynginx/mynginx:v1.0.0
         ports:
         - containerPort: 80
       imagePullSecrets:
