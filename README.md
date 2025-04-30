@@ -1,11 +1,11 @@
-## DUIN and MSTeams notification
+## DIUN and MSTeams notification
 
 ### must add secrets before apply
-* duin/secrets.yaml
+* diun/secrets.yaml
 * nginx/container-registry-secrets.yaml
 * nginx-do/container-registry-secrets.yaml
 
-#### duin/secrets.yaml
+#### diun/secrets.yaml
 ```sh
 apiVersion: v1
 kind: Secret
